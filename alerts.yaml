@@ -77,7 +77,7 @@ groups:
 - name: High-Pod-CPU
   rules:
   - alert: HighPodCPU
-    expr: avg(rate(container_cpu_usage_seconds_total{namespace!="",image!="",container_name!="POD"}[5m])*100) by (pod,namespace  )  > 85
+    expr: avg(rate(container_cpu_usage_seconds_total{namespace!="",image!="",container_name!="POD"}[5m])*100) by (pod,namespace  )  > 100
     for: 5m
     labels:
       severity: warning
