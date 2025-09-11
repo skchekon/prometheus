@@ -28,7 +28,12 @@ scrape_configs:
       - source_labels: ['nodename']
         regex: 'k8s.worker.node.(.*)'
         target_label: nodename
-        replacement: appz-dev-worker-${1}
+        replacement: appz-dev-worker-${1}    
+      - source_labels: [__address__]
+        regex: 172.233.197.223:9100
+        target_label: nodename
+        replacement: VPN_Server_Pre-prod
+      
   
   - job_name: 'kube-state-metrics'
     static_configs:
