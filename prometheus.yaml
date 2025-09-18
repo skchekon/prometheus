@@ -45,7 +45,7 @@ scrape_configs:
         target_label: nodename
         replacement: Ti-prod-worker-3
       - source_labels: [__address__]
-        regex: 172.233.144.12:9100
+        regex: 172.234.144.12:9100
         target_label: nodename
         replacement: prod-engine-master
       - source_labels: [__address__]
