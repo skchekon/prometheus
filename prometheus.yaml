@@ -18,25 +18,34 @@ scrape_configs:
       - targets: ['localhost:9090']
 
   - job_name: 'node-exporter'
-    kubernetes_sd_configs:
-      - role: node
+    static_configs:
+      - targets:
+          - 192.168.144.198:9100
+          - 192.168.144.151:9100
+          - 172.233.193.238:9100
+          - 192.168.181.210:9100
+          - 172.233.197.223:9100
     relabel_configs:
-      - source_labels: [__meta_kubernetes_node_name]
-        regex: lke500232-720511-26774aaa0000
+      - source_labels: [__address__]
+        regex: 192.168.144.198:9100
         target_label: nodename
         replacement: Ti-preprod-worker-0
-      - source_labels: [__meta_kubernetes_node_name]
-        regex: lke500232-720511-345fc3ec0000
+      - source_labels: [__address__]
+        regex: 192.168.144.151:9100
         target_label: nodename
         replacement: Ti-preprod-worker-1
-      - source_labels: [__meta_kubernetes_node_name]
-        regex: lke500232-720511-4d171fd30000
+      - source_labels: [__address__]
+        regex: 172.233.197.223:9100
         target_label: nodename
         replacement: VPN-Server-Preprod
-      - source_labels: [__meta_kubernetes_node_name]
-        regex: engine-master
+      - source_labels: [__address__]
+        regex: 172.233.193.238:9100
         target_label: nodename
         replacement: engine-master
+      - source_labels: [__address__]
+        regex: 192.168.181.210:9100
+        target_label: nodename
+        replacement: Ti-preprod-worker-2
 
   - job_name: 'kube-state-metrics'
     static_configs:
