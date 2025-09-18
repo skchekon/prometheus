@@ -4,53 +4,80 @@ global:
 
 alerting:
   alertmanagers:
-  - static_configs:
-    - targets:
-       - alert-manager-0-27:9093
+    - static_configs:
+        - targets:
+            - alert-manager-0-27:9093
 
 rule_files:
-   - /opt/bitnami/prometheus/conf/rules.yaml
-   - /opt/bitnami/prometheus/conf/alerts.yaml
+  - /opt/bitnami/prometheus/conf/rules.yaml
+  - /opt/bitnami/prometheus/conf/alerts.yaml
 
 scrape_configs:
   - job_name: 'prometheus'
     static_configs:
-    - targets: ['localhost:9090']
-  
-  - job_name: 'node-exporter'
+      - targets: ['localhost:9090']
+
+  - job_name: 'node-exporter-prod'
     static_configs:
-    - targets: ['192.168.135.67:9100', '192.168.176.48:9100', '192.168.130.209:9100', '172.234.144.12:9100', '172.234.136.73:9100','192.168.135.53:9100', '192.168.135.69:9100']
-    metric_relabel_configs:
-      - source_labels: ['nodename']
-        regex: '(engine.master)'
+      - targets:
+          - 192.168.130.209:9100
+          - 192.168.176.48:9100
+          - 192.168.135.67:9100
+          - 192.168.135.69:9100
+          - 172.233.144.12:9100
+          - 192.168.135.53:9100
+          - 172.234.136.73:9100
+    relabel_configs:
+      - source_labels: [__address__]
+        regex: 192.168.130.209:9100
         target_label: nodename
-        replacement: appz-${1}
-      - source_labels: ['nodename']
-        regex: 'k8s.worker.node.(.*)'
+        replacement: Ti-prod-worker-0
+      - source_labels: [__address__]
+        regex: 192.168.176.48:9100
         target_label: nodename
-        replacement: appz-dev-worker-${1}
-  
+        replacement: Ti-prod-worker-1
+      - source_labels: [__address__]
+        regex: 192.168.135.67:9100
+        target_label: nodename
+        replacement: Ti-prod-worker-2
+      - source_labels: [__address__]
+        regex: 192.168.135.69:9100
+        target_label: nodename
+        replacement: Ti-prod-worker-3
+      - source_labels: [__address__]
+        regex: 172.233.144.12:9100
+        target_label: nodename
+        replacement: prod-engine-master
+      - source_labels: [__address__]
+        regex: 192.168.135.53:9100
+        target_label: nodename
+        replacement: Ti-prod-worker-4
+      - source_labels: [__address__]
+        regex: 172.234.136.73:9100
+        target_label: nodename
+        replacement: VPN-Server-Prod
+
   - job_name: 'kube-state-metrics'
     static_configs:
-    - targets: ['kube-state-metrics.kube-system.svc.cluster.local:8080']
-    
+      - targets: ['kube-state-metrics.kube-system.svc.cluster.local:8080']
+
   - job_name: 'kubernetes-cadvisor'
     scheme: https
     tls_config:
       ca_file: /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
     bearer_token_file: /var/run/secrets/kubernetes.io/serviceaccount/token
     kubernetes_sd_configs:
-    - role: node
+      - role: node
     relabel_configs:
-    - action: labelmap
-      regex: __meta_kubernetes_node_label_(.+)
-    - target_label: __address__
-      replacement: kubernetes.default.svc:443
-    - source_labels: [__meta_kubernetes_node_name]
-      regex: (.+)
-      target_label: __metrics_path__
-      replacement: /api/v1/nodes/${1}/proxy/metrics/cadvisor
-      
+      - action: labelmap
+        regex: __meta_kubernetes_node_label_(.+)
+      - target_label: __address__
+        replacement: kubernetes.default.svc:443
+      - source_labels: [__meta_kubernetes_node_name]
+        regex: (.+)
+        target_label: __metrics_path__
+        replacement: /api/v1/nodes/${1}/proxy/metrics/cadvisor
+
   - job_name: 'app_db_health'
     scrape_interval: 15s
     metrics_path: /probe
@@ -58,7 +85,7 @@ scrape_configs:
       module: [http_2xx]
     static_configs:
       - targets: ['mysql-healthcheck-3-11:5000/health/db']
-       
+
     relabel_configs:
       - source_labels: [__address__]
         target_label: __param_target
@@ -66,6 +93,7 @@ scrape_configs:
         target_label: instance
       - target_label: __address__
         replacement: blackbox-exporter-0-2:9115
+
   - job_name: 'tcp_connect_check'
     scrape_interval: 15s
     metrics_path: /probe
@@ -80,4 +108,5 @@ scrape_configs:
         target_label: instance
       - target_label: __address__
         replacement: blackbox-exporter-0-2:9115
+
         
