@@ -109,4 +109,5 @@ scrape_configs:
       - target_label: __address__
         replacement: blackbox-exporter-0-2:9115
 
-        
+revision: 1
+
