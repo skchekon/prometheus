@@ -72,7 +72,7 @@ scrape_configs:
         regex: (.+)
         target_label: __metrics_path__
         replacement: /api/v1/nodes/${1}/proxy/metrics/cadvisor
-        
+
   - job_name: 'kubernetes-kubelet'
     scheme: https
     metrics_path: /metrics
@@ -90,11 +90,17 @@ scrape_configs:
         regex: (.+)
         target_label: __metrics_path__
         replacement: /api/v1/nodes/${1}/proxy/metrics
-        
+
   - job_name: 'kafka'
     static_configs:
-      - targets: ['kafka:9308']
+      - targets:
+          - 10.2.2.142:9308
+          - 10.2.2.144:9308
+          - 10.2.0.138:9308
     metrics_path: /metrics
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label: instance
 
   - job_name: 'app_db_health'
     scrape_interval: 15s
@@ -103,7 +109,6 @@ scrape_configs:
       module: [http_2xx]
     static_configs:
       - targets: ['mysql-healthcheck-3-11:5000/health/db']
-
     relabel_configs:
       - source_labels: [__address__]
         target_label: __param_target
@@ -122,4 +127,3 @@ scrape_configs:
     relabel_configs:
       - action: labelmap
         regex: __meta_kubernetes_node_label_(.+)
-
