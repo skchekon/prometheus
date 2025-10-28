@@ -74,3 +74,14 @@ groups:
       annotations:
         summary: "MySQL down on {{ $labels.instance }}"
         description: "TCP connection to MySQL port 3306 failed (likely VPN issue)"
+
+- name: PVC-usage
+  rules:
+  - alert: PVCHighUsage
+    expr: (kubelet_volume_stats_used_bytes / kubelet_volume_stats_capacity_bytes) * 100 > 85
+    for: 5m
+    labels:
+      severity: warning
+    annotations:
+      summary: PVC high usage (namespace {{ $labels.namespace }}, claim {{ $labels.persistentvolumeclaim }})
+      description: "PVC usage > 85%\n VALUE = {{ $value }}%\n LABELS = {{ $labels }}"
