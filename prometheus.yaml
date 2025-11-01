@@ -62,7 +62,7 @@ scrape_configs:
         regex: 192.168.129.70:9100
         target_label: nodename
         replacement: mysql-prod-node-0
-     - source_labels: [__address__]
+      - source_labels: [__address__]
         regex: 192.168.162.25:9100
         target_label: nodename
         replacement: mysql-prod-node-1
