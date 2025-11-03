@@ -27,8 +27,8 @@ scrape_configs:
           - 172.234.144.12:9100
           - 192.168.135.53:9100
           - 172.234.136.73:9100
-          - 192.168.129.70:9100
-          - 192.168.162.25:9100
+          - 192.168.175.154:9100
+          - 192.168.175.224:9100
     relabel_configs:
       - source_labels: [__address__]
         regex: 192.168.130.209:9100
@@ -59,11 +59,11 @@ scrape_configs:
         target_label: nodename
         replacement: VPN-Server-Prod
       - source_labels: [__address__]
-        regex: 192.168.129.70:9100
+        regex: 192.168.175.154:9100
         target_label: nodename
         replacement: mysql-prod-node-0
       - source_labels: [__address__]
-        regex: 192.168.162.25:9100
+        regex: 192.168.175.224:9100
         target_label: nodename
         replacement: mysql-prod-node-1
   - job_name: 'kube-state-metrics'
