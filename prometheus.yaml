@@ -93,15 +93,15 @@ scrape_configs:
 
   - job_name: 'kafka-exporter'
     kubernetes_sd_configs:
-      - role: pod
+    - role: pod
     relabel_configs:
-      - source_labels: [__meta_kubernetes_pod_label_app]
-        regex: kafka-cluster
-        action: keep
-      - source_labels: [__meta_kubernetes_pod_container_port_number]
-        regex: "9308"
-        action: keep
-
+    - source_labels: [__meta_kubernetes_pod_label_run]
+      regex: kafka-cluster-4-0
+      action: keep
+    - source_labels: [__meta_kubernetes_pod_container_port_number]
+      regex: "9308"
+      action: keep
+        
   - job_name: 'app_db_health'
     scrape_interval: 15s
     metrics_path: /probe
