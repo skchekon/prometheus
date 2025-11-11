@@ -91,16 +91,16 @@ scrape_configs:
         target_label: __metrics_path__
         replacement: /api/v1/nodes/${1}/proxy/metrics
 
-  - job_name: 'kafka'
-    static_configs:
-      - targets:
-          - kafka-4-0-0:9094
-          - kafka-4-0-1:9094
-          - kafka-4-0-2:9094
-    metrics_path: /metrics
+  - job_name: 'kafka-exporter'
+    kubernetes_sd_configs:
+      - role: pod
     relabel_configs:
-      - source_labels: [__address__]
-        target_label: instance
+      - source_labels: [__meta_kubernetes_pod_label_app]
+        regex: kafka-cluster
+        action: keep
+      - source_labels: [__meta_kubernetes_pod_container_port_number]
+        regex: "9308"
+        action: keep
 
   - job_name: 'app_db_health'
     scrape_interval: 15s
