@@ -97,3 +97,80 @@ groups:
       description: |-
         Description: PVC usage > 80%
         VALUE = {{ $value }}%
+# -----------------------------
+# Windows Alerts Section Added
+# -----------------------------
+
+- name: Windows-CPU-Usage
+  rules:
+  - alert: WindowsHighCpuUsage
+    expr: 100 - (sum by (instance) (rate(windows_cpu_time_total{mode="idle"}[2m])) / count by (instance) (windows_cpu_time_total{mode="idle"}) * 100) > 95
+    for: 3m
+    labels:
+      severity: warning
+    annotations:
+      summary: High CPU usage on Windows Server (instance {{ $labels.instance }})
+      description: "CPU usage is > 95% for more than 3 minutes.\n  VALUE = {{ $value | printf \"%.2f\" }}%\n  LABELS = {{ $labels }}"
+      host: "{{ $labels.instance }}"
+      title: "High CPU Usage"
+
+- name: Windows-Memory-Usage
+  rules:
+  - alert: WindowsLowMemory
+    expr: (windows_os_physical_memory_free_bytes / windows_os_visible_memory_bytes * 100) < 10
+    for: 10m
+    labels:
+      severity: warning
+    annotations:
+      summary: Low memory on Windows Server (instance {{ $labels.instance }})
+      description: "Available memory is < 10% of total memory.\n  VALUE = {{ $value | printf \"%.2f\" }}%\n  LABELS = {{ $labels }}"
+      host: "{{ $labels.instance }}"
+      title: "Low Memory"
+
+- name: Windows-Disk-Usage
+  rules:
+  - alert: WindowsLowDiskSpace
+    expr: (windows_logical_disk_free_bytes / windows_logical_disk_size_bytes * 100) < 15
+    for: 5m
+    labels:
+      severity: critical
+    annotations:
+      summary: Low disk space on Windows Server (instance {{ $labels.instance }})
+      description: "Disk space is < 15% on volume {{ $labels.volume }}.\n  Available Space = {{ $value | printf \"%.2f\" }}%\n  LABELS = {{ $labels }}"
+      host: "{{ $labels.instance }}"
+      title: "Low Disk Space"
+
+  - alert: WindowsHighDiskLatency
+    expr: rate(windows_logical_disk_read_write_latency_seconds_total[5m]) > 0.1
+    for: 5m
+    labels:
+      severity: warning
+    annotations:
+      summary: High disk latency on Windows Server (instance {{ $labels.instance }})
+      description: "Average disk read/write latency is > 100ms on volume {{ $labels.volume }}.\n  VALUE = {{ $value | printf \"%.3f\" }} seconds\n  LABELS = {{ $labels }}"
+      host: "{{ $labels.instance }}"
+      title: "High Disk Latency"
+
+- name: Windows-Network-Usage
+  rules:
+  - alert: WindowsHighNetworkUsage
+    expr: rate(windows_net_bytes_total{nic="Amazon_Elastic_Network_Adapter"}[5m]) > 10000000
+    for: 5m
+    labels:
+      severity: warning
+    annotations:
+      summary: High network usage on Windows Server (instance {{ $labels.instance }})
+      description: "Network usage exceeds 10MB/s on interface {{ $labels.nic }}.\n  VALUE = {{ $value | printf \"%.2f\" }} bytes/s\n  LABELS = {{ $labels }}"
+      host: "{{ $labels.instance }}"
+      title: "High Network Usage"
+
+  - alert: WindowsNetworkErrors
+    expr: rate(windows_net_packets_received_errors_total{nic="Amazon_Elastic_Network_Adapter"}[5m]) > 0 or rate(windows_net_packets_outbound_errors_total{nic="Amazon_Elastic_Network_Adapter"}[5m]) > 0
+    for: 5m
+    labels:
+      severity: critical
+    annotations:
+      summary: Network errors detected on Windows Server (instance {{ $labels.instance }})
+      description: "Network errors detected on interface {{ $labels.nic }}.\n  LABELS = {{ $labels }}"
+      host: "{{ $labels.instance }}"
+      title: "Network Errors"
