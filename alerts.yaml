@@ -78,12 +78,12 @@ groups:
 - name: PVC-usage
   rules:
   - alert: PVCHighUsage
-    expr: (kubelet_volume_stats_used_bytes / kubelet_volume_stats_capacity_bytes) * 100 > 80
+    expr: (kubelet_volume_stats_used_bytes / kubelet_volume_stats_capacity_bytes) * 100 > 70
     for: 5m
     labels:
       severity: warning
     annotations:
       summary: PVC high usage (namespace {{ $labels.namespace }}, claim {{ $labels.persistentvolumeclaim }})
       description: |-
-        Description: PVC usage > 80%
+        Description: PVC usage > 70%
         VALUE = {{ $value }}%
