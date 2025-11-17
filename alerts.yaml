@@ -165,16 +165,6 @@ groups:
       summary: "MySQL Replication Appears Stopped (instance {{ $labels.instance }})"
       description: "No change in replication lag for 10 minutes.\nReplication may be stuck or stopped silently.\nLABELS = {{ $labels }}"
 
-- name: MySQL-ReadOnlyEnabled
-  rules:
-  - alert: MySQLReadOnlyEnabled
-    expr: mysql_global_variables_read_only == 1
-    for: 1m
-    labels:
-      severity: critical
-    annotations:
-      summary: "MySQL Master is in Read-Only Mode (instance {{ $labels.instance }})"
-      description: "The master {{ $labels.instance }} is in read-only mode.\nWrites are blocked.\nLABELS = {{ $labels }}"
 
 - name: MySQL-BinlogGrowingFast
   rules:
