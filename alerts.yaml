@@ -87,3 +87,102 @@ groups:
       description: |-
         Description: PVC usage > 70%
         VALUE = {{ $value }}%
+
+- name: MySQL-ReplicaDown
+  rules:
+  - alert: MySQLReplicaDown
+    expr: mysql_up == 0
+    for: 1m
+    labels:
+      severity: critical
+    annotations:
+      summary: "MySQL Replica Down (instance {{ $labels.instance }})"
+      description: "The MySQL exporter or replica is unreachable.\nVALUE = {{ $value }}\nLABELS = {{ $labels }}"
+
+- name: MySQL-SlaveIOThreadDown
+  rules:
+  - alert: MySQLSlaveIOThreadDown
+    expr: mysql_slave_status_slave_io_running == 0
+    for: 2m
+    labels:
+      severity: critical
+    annotations:
+      summary: "MySQL Slave IO Thread stopped (instance {{ $labels.instance }})"
+      description: "Replication IO thread stopped on slave {{ $labels.instance }}.\nVALUE = {{ $value }}"
+
+- name: MySQL-SlaveSQLThreadDown
+  rules:
+  - alert: MySQLSlaveSQLThreadDown
+    expr: mysql_slave_status_slave_sql_running == 0
+    for: 2m
+    labels:
+      severity: critical
+    annotations:
+      summary: "MySQL Slave SQL Thread stopped (instance {{ $labels.instance }})"
+      description: "Replication SQL thread stopped on slave {{ $labels.instance }}.\nVALUE = {{ $value }}"
+
+- name: MySQL-ReplicationLagHigh
+  rules:
+  - alert: MySQLReplicationLagHigh
+    expr: mysql_slave_status_seconds_behind_master > 60
+    for: 5m
+    labels:
+      severity: warning
+    annotations:
+      summary: "MySQL Replication Lag High (instance {{ $labels.instance }})"
+      description: "Replication lag is {{ $value }} seconds.\nSlave is falling behind master.\nLABELS = {{ $labels }}"
+
+- name: MySQL-ReplicationError
+  rules:
+  - alert: MySQLReplicationError
+    expr: mysql_slave_status_last_errno > 0
+    for: 1m
+    labels:
+      severity: critical
+    annotations:
+      summary: "MySQL Replication Error (instance {{ $labels.instance }})"
+      description: "Replication stopped due to an error on slave {{ $labels.instance }}.\nError code: {{ $value }}\nLABELS = {{ $labels }}"
+
+- name: MySQL-SlaveNotConnected
+  rules:
+  - alert: MySQLSlaveNotConnected
+    expr: mysql_slave_status_slave_io_running == 0 or mysql_slave_status_slave_sql_running == 0
+    for: 3m
+    labels:
+      severity: critical
+    annotations:
+      summary: "MySQL Slave Disconnected (instance {{ $labels.instance }})"
+      description: "Slave {{ $labels.instance }} lost connection or replication stopped.\nEither IO or SQL thread is not running.\nLABELS = {{ $labels }}"
+
+- name: MySQL-ReplicationStoppedForLong
+  rules:
+  - alert: MySQLReplicationStoppedForLong
+    expr: increase(mysql_slave_status_seconds_behind_master[10m]) == 0
+    for: 10m
+    labels:
+      severity: warning
+    annotations:
+      summary: "MySQL Replication Appears Stopped (instance {{ $labels.instance }})"
+      description: "No change in replication lag for 10 minutes.\nReplication may be stuck or stopped silently.\nLABELS = {{ $labels }}"
+
+- name: MySQL-ReadOnlyEnabled
+  rules:
+  - alert: MySQLReadOnlyEnabled
+    expr: mysql_global_variables_read_only == 1
+    for: 1m
+    labels:
+      severity: critical
+    annotations:
+      summary: "MySQL Master is in Read-Only Mode (instance {{ $labels.instance }})"
+      description: "The master {{ $labels.instance }} is in read-only mode.\nWrites are blocked.\nLABELS = {{ $labels }}"
+
+- name: MySQL-BinlogGrowingFast
+  rules:
+  - alert: MySQLBinlogGrowingFast
+    expr: rate(mysql_binlog_size_bytes[10m]) > 50000000
+    for: 10m
+    labels:
+      severity: warning
+    annotations:
+      summary: "MySQL Binlog Growing Fast (instance {{ $labels.instance }})"
+      description: "Binlog size increasing more than 50 MB per 10 minutes.\nCheck binlog retention.\nLABELS = {{ $labels }}"
