@@ -176,3 +176,61 @@ groups:
     annotations:
       summary: "MySQL Binlog Growing Fast (instance {{ $labels.instance }})"
       description: "Binlog size increasing more than 50 MB per 10 minutes.\nCheck binlog retention.\nLABELS = {{ $labels }}"
+
+
+- name: Kafka-BrokerDown
+  rules:
+  - alert: KafkaBrokerDown
+    expr: count(kafka_broker_info) < max(kafka_broker_info)
+    for: 2m
+    labels:
+      severity: critical
+    annotations:
+      summary: "Kafka Broker Down"
+      description: "One or more brokers are down or unreachable."
+
+- name: Kafka-UnderReplicated
+  rules:
+  - alert: KafkaUnderReplicatedPartitions
+    expr: sum(kafka_topic_partition_replicas - kafka_topic_partition_in_sync_replica) > 0
+    for: 2m
+    labels:
+      severity: warning
+    annotations:
+      summary: "Kafka Under Replicated Partitions"
+      description: "Some partitions do not have enough in-sync replicas (ISR < Replicas)."
+
+- name: Kafka-OfflinePartitions
+  rules:
+  - alert: KafkaOfflinePartitions
+    expr: sum(kafka_topic_partition_leader == -1) > 0
+    for: 1m
+    labels:
+      severity: critical
+    annotations:
+      summary: "Kafka Offline Partitions"
+      description: "No leader for some partitions. Reads/Writes blocked."
+
+- name: Kafka-HighLag
+  rules:
+  - alert: KafkaHighConsumerLag
+    expr: sum(kafka_consumergroup_lag{topic!="__consumer_offsets"}) > 20
+    for: 5m
+    labels:
+      severity: warning
+    annotations:
+      summary: "High Kafka Consumer Lag"
+      description: "Consumers are falling behind. Total lag: {{ $value }} messages."
+
+- name: Kafka-ConsumerStalled
+  rules:
+  - alert: KafkaStalledConsumerGroup
+    expr: |
+      sum(kafka_consumergroup_lag{topic!="__consumer_offsets"}) > 50
+      and rate(kafka_consumergroup_current_offset[5m]) <= 0
+    for: 10m
+    labels:
+      severity: critical
+    annotations:
+      summary: "Kafka Consumer Group Stalled"
+      description: "Offsets not increasing for 10 minutes while lag is high."
